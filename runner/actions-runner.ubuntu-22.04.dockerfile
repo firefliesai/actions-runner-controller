@@ -86,11 +86,13 @@ RUN set -vx; \
     && install -o root -g root -m 755 docker/docker /usr/bin/docker \
     && rm -rf docker docker.tgz
 
+ENV DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
 RUN export ARCH=$(echo ${TARGETPLATFORM} | cut -d / -f2) \
     && if [ "$ARCH" = "arm64" ]; then export ARCH=aarch64 ; fi \
     && if [ "$ARCH" = "amd64" ] || [ "$ARCH" = "i386" ]; then export ARCH=x86_64 ; fi \
-    && curl -fLo /usr/bin/docker-compose https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-${ARCH} \
-    && chmod +x /usr/bin/docker-compose
+    && mkdir -p $DOCKER_CONFIG/cli-plugins \
+    && curl -fLo $DOCKER_CONFIG/cli-plugins/docker-compose https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-${ARCH} \
+    && chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
 
 # We place the scripts in `/usr/bin` so that users who extend this image can
 # override them with scripts of the same name placed in `/usr/local/bin`.
